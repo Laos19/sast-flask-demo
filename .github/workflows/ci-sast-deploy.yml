@@ -1,0 +1,101 @@
+# Pipeline de NotasApp: pruebas + 2 herramientas SAST (Bandit y CodeQL) + despliegue en Render
+name: CI · SAST · Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # 1) Pruebas funcionales con pytest
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: pytest -v
+
+  # 2) SAST con Bandit (integrante 1: Antony Solorzano)
+  sast-bandit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write   # necesario para subir el SARIF a Code Scanning
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install "bandit[sarif]"
+      - name: Bandit (reporta sin bloquear)
+        run: |
+          bandit -r app -f txt --exit-zero
+          bandit -r app -f html  -o bandit.html  --exit-zero
+          bandit -r app -f sarif -o bandit.sarif --exit-zero
+      # QUALITY GATE (Fase 7): descomentar para bloquear el pipeline si hay hallazgos de severidad ALTA
+      # - name: Quality gate Bandit (severidad alta)
+      #   run: bandit -r app -lll
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reporte-bandit
+          path: |
+            bandit.html
+            bandit.sarif
+      - uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: bandit.sarif
+          category: bandit
+
+  # 3) SAST con CodeQL (integrante 2: Adriana Laos; reemplaza a Bearer CLI)
+  sast-codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: python
+          config-file: ./.github/codeql/codeql-config.yml
+      - name: CodeQL analyze (sube los resultados a Code Scanning; nunca bloquea)
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: codeql-python
+          output: codeql-sarif
+      # QUALITY GATE (Fase 7): descomentar para bloquear si hay hallazgos High/Critical (security-severity >= 7.0)
+      # - name: Quality gate CodeQL (severidad alta)
+      #   run: python scripts/sarif_gate.py codeql-sarif/python.sarif 7.0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reporte-codeql
+          path: codeql-sarif/
+
+  # 4) Despliegue en Render: solo si todo lo anterior pasó y es un push a main
+  deploy:
+    needs: [tests, sast-bandit, sast-codeql]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Disparar Deploy Hook de Render
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK" ]; then
+            echo "::warning::Falta el secreto RENDER_DEPLOY_HOOK (se configura en la Fase 5). No se despliega."
+            exit 0
+          fi
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK"

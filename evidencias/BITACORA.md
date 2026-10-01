@@ -178,3 +178,17 @@ Reporte legible generado con `scripts/sarif_resumen.py` (convierte el SARIF a te
 python scripts\sarif_resumen.py evidencias\04_codeql\antes\codeql.sarif evidencias\04_codeql\antes\codeql.txt
 ```
 Evidencias: `04_codeql/antes/{codeql.sarif, codeql.csv, codeql.txt}` y `05_comparativa/hallazgos_antes.md`.
+
+---
+
+## Fase 4: Pipeline en GitHub Actions (2026-10-01)
+
+Se crearon `.github/workflows/ci-sast-deploy.yml` (jobs `tests`, `sast-bandit`, `sast-codeql`, `deploy`) y `scripts/sarif_gate.py`.
+En la versión vulnerable los escaneos **reportan sin bloquear**. Las líneas del quality gate quedan comentadas para la Fase 7.
+
+Prueba local de los gates contra la versión vulnerable (los dos deben fallar):
+```powershell
+python scripts\sarif_gate.py evidencias\04_codeql\antes\codeql.sarif 7.0   # 5 hallazgos >= 7.0 -> exit 1
+bandit -r app -lll                                                        # High: 3 (B324, B602, B201) -> exit 1
+```
+Nota: con `-lll` Bandit no bloquearía por V1 (B608 es Medium) ni por V3 (B105 es Low). CodeQL sí bloquea por las 5.
