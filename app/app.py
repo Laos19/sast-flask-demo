@@ -1,7 +1,7 @@
-"""NotasApp: app Flask mínima con 5 vulnerabilidades A PROPÓSITO (V1–V5).
+"""NotasApp: app Flask mínima para demostrar análisis SAST con Bandit y CodeQL.
 
-Sirve como objetivo para las herramientas SAST Bandit y Bearer CLI.
-¡No usar en producción!
+La versión vulnerable (tag v1-vulnerable) tenía 5 fallas a propósito (V1–V5);
+cada corrección está marcada con "# CORREGIDO:" (tag v2-corregido).
 """
 import functools
 import ipaddress
@@ -155,5 +155,5 @@ def ping():
 
 
 if __name__ == "__main__":
-    # VULNERABLE: V5 modo debug activo, expone el depurador interactivo de Werkzeug (CWE-489/CWE-94)
-    app.run(debug=True)
+    # CORREGIDO: V5 debug solo si FLASK_DEBUG=1 explícitamente; por defecto False
+    app.run(debug=os.environ.get("FLASK_DEBUG", "0") == "1")
