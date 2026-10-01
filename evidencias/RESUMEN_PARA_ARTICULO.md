@@ -306,5 +306,5 @@ Por seguridad **solo se desplegó la versión corregida**: publicar `v1-vulnerab
 | `cap_actions_verde.png` | Ejecución #7 (ff1fde7) con quality gates activos: tests 9 s, sast-bandit 18 s, sast-codeql 39 s, deploy 3 s; 2 artifacts; total 48 s |
 | `cap_artifacts.png` | Artifacts `reporte-bandit` (2,49 KB) y `reporte-codeql` (42,8 KB) |
 | `cap_code_scanning.png` | Security → Code scanning en `main`: **2 abiertas** (Bandit B603 y B404, nivel *Note*) y **11 cerradas** (las 6 de Bandit y 5 de CodeQL de la versión vulnerable, ya corregidas). "Tools: 2" |
-| `cap_gate_verde.png` | *(pendiente)* Paso "Quality gate" en verde en `main` |
+| `cap_gate_verde.png` | *(no tomada, opcional)* El estado verde con gates activos se ve en `cap_actions_verde.png` (run #7) |
 | `cap_render_deploy_hook.png` | *(opcional)* Render → Events con un deploy de trigger "Deploy hook" |
