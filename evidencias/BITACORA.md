@@ -255,3 +255,26 @@ Pasos manuales en `07_deploy/PASOS_RENDER.md`. Se agregó `.python-version` (3.1
 - `git push` (ef74754..52eb041) → https://github.com/Laos19/sast-flask-demo/actions/runs/36843519408 → success.
   El job `deploy` ejecutó `curl -fsS -X POST "$RENDER_DEPLOY_HOOK"` sin errores y ya no muestra el aviso de secreto faltante.
 - Captura: `09_capturas/cap_app_online.png`.
+
+---
+
+## Fase 7: Quality gate (2026-10-01)
+
+```powershell
+# Se descomentaron los dos gates del YAML
+git commit -m "ci: activar quality gate de Bandit y CodeQL (severidad alta)"   # 90fec56
+git push origin main
+```
+→ https://github.com/Laos19/sast-flask-demo/actions/runs/36843839029 **success** (los dos gates ✔, deploy ✔).
+
+Demostración del bloqueo (se eligió reintroducir **V2**, porque Bandit con `-lll` no bloquea V1, que es Medium):
+```powershell
+git switch -c demo-gate
+# app.py ping(): vuelve shell=True con f-string y sin host_valido()
+pytest -q            # 1 failed (test_v2_ping_rechaza_inyeccion_de_comandos), 6 passed
+bandit -r app -lll   # B602 High -> exit 1
+git commit -m "demo: reintroducir V2 (shell=True) para probar el quality gate"
+git push -u origin demo-gate
+git switch main
+```
+El PR se abre a mano desde la web (no hay GitHub CLI). Evidencias: `08_quality_gate/links.md`.
