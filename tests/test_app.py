@@ -59,3 +59,10 @@ def test_v1_busqueda_no_filtra_notas_ajenas(cliente):
     iniciar_sesion(cliente)
     html = cliente.get("/buscar", query_string={"q": "' OR 1=1 --"}).get_data(as_text=True)
     assert "Privado de Beto" not in html
+
+
+def test_v2_ping_rechaza_inyeccion_de_comandos(cliente):
+    registrar(cliente)
+    iniciar_sesion(cliente)
+    html = cliente.get("/ping", query_string={"host": "127.0.0.1 && whoami"}).get_data(as_text=True)
+    assert "Host no válido" in html

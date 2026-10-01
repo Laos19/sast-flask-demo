@@ -5,7 +5,10 @@ Sirve como objetivo para las herramientas SAST Bandit y Bearer CLI.
 """
 import functools
 import hashlib
+import ipaddress
 import os
+import re
+import shutil
 import subprocess
 
 from flask import Flask, redirect, render_template, request, session, url_for
@@ -27,6 +30,18 @@ with app.app_context():
 def hash_password(password):
     # VULNERABLE: V4 MD5 es un hash débil y sin sal para contraseñas (CWE-327)
     return hashlib.md5(password.encode()).hexdigest()
+
+
+HOST_REGEX = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9.-]{0,252})")
+
+
+def host_valido(host):
+    """Acepta solo una IP (v4/v6) o un nombre de host sin espacios ni símbolos de shell."""
+    try:
+        ipaddress.ip_address(host)
+        return True
+    except ValueError:
+        return HOST_REGEX.fullmatch(host) is not None
 
 
 def login_requerido(vista):
@@ -125,11 +140,17 @@ def ping():
     salida = ""
     if host:
         opcion = "-n" if os.name == "nt" else "-c"
-        # VULNERABLE: V2 Command Injection, shell=True con entrada del usuario (CWE-78)
-        resultado = subprocess.run(
-            f"ping {opcion} 1 {host}", shell=True, capture_output=True, text=True, timeout=10
-        )
-        salida = resultado.stdout + resultado.stderr
+        ejecutable = shutil.which("ping")
+        if not host_valido(host):
+            salida = "Host no válido: usa una IP o un nombre de dominio (letras, números, '.' y '-')."
+        elif ejecutable is None:
+            salida = "El comando ping no está disponible en este servidor."
+        else:
+            # CORREGIDO: V2 lista de argumentos sin shell + host validado; "&&" o ";" ya no ejecutan nada
+            resultado = subprocess.run(
+                [ejecutable, opcion, "1", host], capture_output=True, text=True, timeout=10
+            )
+            salida = resultado.stdout + resultado.stderr
     return render_template("ping.html", host=host, salida=salida)
 
 
