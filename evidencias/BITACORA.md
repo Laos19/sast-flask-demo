@@ -281,3 +281,14 @@ El PR se abre a mano desde la web (no hay GitHub CLI). Evidencias: `08_quality_g
 PR https://github.com/Laos19/sast-flask-demo/pull/1 (demo-gate → main), abierto por Adriana.
 Ejecución https://github.com/Laos19/sast-flask-demo/actions/runs/36844157546 → **failure**:
 tests ✘ · sast-bandit ✘ (gate) · sast-codeql ✘ (gate; anotación `py/command-line-injection (9.8) en app/app.py:145`) · deploy **skipped**.
+
+---
+
+## Fase 8: README y cierre (2026-10-01)
+- Capturas del PR #1 guardadas: `cap_pr_comentario_bandit.png`, `cap_pr_comentario_codeql.png`, `cap_gate_rojo.png`.
+- **Hallazgo:** en el PR #1 comentó también el bot **SonarQube Cloud** ("Quality Gate failed"). No está en nuestro pipeline:
+  su GitHub App, instalada en el lab01, tiene acceso a todos los repos de la cuenta y analizó este de forma automática.
+  Se recomienda quitar el repo de su alcance (SonarCloud se usó en los labs y no es parte de este trabajo).
+- Listas oficiales verificadas: OWASP incluye **Bandit** (entrada propia) y **CodeQL** (entrada "GitHub Advanced Security").
+  NIST incluye Bearer, pero no Bandit ni CodeQL.
+- Se escribieron `README.md` (badges, diagrama Mermaid, ejecución local, comandos de las herramientas) y `evidencias/RESUMEN_PARA_ARTICULO.md`.
