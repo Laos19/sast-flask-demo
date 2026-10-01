@@ -240,3 +240,14 @@ En Code Scanning, las alertas de la versión vulnerable deben quedar como **Fixe
 ## Fase 5: Despliegue en Render (2026-10-01)
 
 Pasos manuales en `07_deploy/PASOS_RENDER.md`. Se agregó `.python-version` (3.12) para que Render use Python 3.12.
+
+### Problema 1: "Deploy failed" en el primer despliegue
+- Build correcto (Python 3.12, flask 3.1.2, gunicorn 23.0.0), pero el arranque falló:
+  `==> Running 'gunicorn app:app'` → `gunicorn.errors.AppImportError: Failed to find attribute 'app' in 'app'.` → `Exited with status 1`
+- Causa: el Start Command quedó con el valor que Render sugiere por defecto (`gunicorn app:app`). Con esa ruta gunicorn busca
+  el objeto `app` dentro del **paquete** `app/` (`app/__init__.py`), pero la app Flask está en el **módulo** `app/app.py`.
+- Solución: Settings → Build & Deploy → Start Command = `gunicorn app.app:app` (formato `paquete.módulo:variable`) → Manual Deploy.
+- Tras corregir el Start Command: deploy **Live** (trigger "Start command updated", 51,8 s). URL: https://sast-flask-demo.onrender.com
+- Verificación con curl en `07_deploy/verificacion_online.txt`: V2 y V5 corregidos en producción.
+- **Hallazgo extra:** el payload `' OR 1=1 --` recibe `403 Blocked` del **WAF de Cloudflare** que Render pone delante del servicio.
+- El Deploy Hook **no** se guardó en el repo; se configura solo como secreto de GitHub (`RENDER_DEPLOY_HOOK`).

@@ -1,0 +1,18 @@
+Verificación de la app desplegada con curl (2026-10-01), versión v2-corregido
+
+GET  /                          -> 200 (0,70 s)  <h1>Bienvenido a NotasApp</h1>
+GET  /no-existe                 -> 404, sin rastro del depurador de Werkzeug (V5 corregido; gunicorn no usa debug)
+POST /registro  (demo_claude)   -> 302 (redirige al login)
+POST /login                     -> 302 (sesión iniciada)
+GET  /ping?host=127.0.0.1 && whoami -> "Host no válido: usa una IP o un nombre de dominio ..." (V2 corregido)
+GET  /ping?host=127.0.0.1       -> "El comando ping no está disponible en este servidor." (la imagen de Render no trae ping)
+
+Hallazgo extra: WAF de Cloudflare delante de Render
+GET  /buscar?q=' OR 1=1 --      -> 403 Forbidden, Server: cloudflare, <title>Blocked</title>
+GET  /buscar?q=hola             -> pasa normalmente (302 al login si no hay sesión)
+=> Render pone Cloudflare delante de los servicios y su WAF bloquea payloads típicos de SQLi ANTES de que lleguen a la app.
+   Es una capa extra (defensa en profundidad), pero NO reemplaza la corrección del código: un payload ofuscado podría
+   pasar el WAF, y en local o en otro hosting no hay WAF. Por eso V1 se corrigió con consultas parametrizadas.
+
+Nota: SQLite en el plan Free está en disco efímero; los usuarios registrados se pierden en cada redeploy o reinicio
+(se observó: el usuario demo_claude ya no existía minutos después).

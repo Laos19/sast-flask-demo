@@ -1,0 +1,5 @@
+App desplegada (Render, plan Free): https://sast-flask-demo.onrender.com
+Service ID: srv-dav2bhe0tbcc73d9k0ng · Python 3 · branch main · commit ef74754 · estado Live
+Start Command: gunicorn app.app:app · Build Command: pip install -r requirements.txt
+Variables de entorno: SECRET_KEY (generada por Render), FLASK_DEBUG=0
+Capturas: 09_capturas/cap_render_dashboard.png, cap_app_online.png
