@@ -293,3 +293,12 @@ tests ✘ · sast-bandit ✘ (gate) · sast-codeql ✘ (gate; anotación `py/com
   NIST incluye Bearer, pero no Bandit ni CodeQL.
 - Se escribieron `README.md` (badges, diagrama Mermaid, ejecución local, comandos de las herramientas) y `evidencias/RESUMEN_PARA_ARTICULO.md`.
 - Capturas finales guardadas: `cap_actions_verde.png` (run #7, 48 s), `cap_artifacts.png`, `cap_code_scanning.png` (2 abiertas *Note* de Bandit, 11 cerradas).
+
+---
+
+## Extra: usuario demo persistente en Render (2026-10-01)
+Problema: el disco de Render Free es efímero, así que los usuarios registrados se borran en cada reinicio o redeploy.
+Solución: `crear_usuario_demo()` en `app/app.py` crea, en cada arranque, el usuario definido en las variables de entorno
+`DEMO_USUARIO` y `DEMO_PASSWORD` (configuradas solo en Render; nunca en el código, para no reintroducir V3).
+Usa `INSERT OR IGNORE` y `hash_password()` (scrypt).
+Verificación local: pytest 8 passed · Bandit sin cambios (2 Low) · CodeQL 0 hallazgos (gate exit 0).

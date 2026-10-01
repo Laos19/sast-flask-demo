@@ -23,13 +23,32 @@ app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 app.config["DATABASE"] = os.environ.get("DATABASE_PATH", "notas.db")
 app.teardown_appcontext(db.close_db)
 
-with app.app_context():
-    db.init_db()
-
 
 def hash_password(password):
     # CORREGIDO: V4 hash lento y con sal aleatoria (scrypt de Werkzeug) en lugar de MD5
     return generate_password_hash(password)
+
+
+def crear_usuario_demo():
+    """Crea el usuario de demostración si DEMO_USUARIO y DEMO_PASSWORD están definidos.
+
+    En Render el disco es efímero y la BD se borra al reiniciar; así el usuario demo
+    vuelve a existir en cada arranque sin escribir credenciales en el código.
+    """
+    usuario = os.environ.get("DEMO_USUARIO")
+    password = os.environ.get("DEMO_PASSWORD")
+    if usuario and password:
+        conexion = db.get_db()
+        conexion.execute(
+            "INSERT OR IGNORE INTO usuarios (usuario, password) VALUES (?, ?)",
+            (usuario, hash_password(password)),
+        )
+        conexion.commit()
+
+
+with app.app_context():
+    db.init_db()
+    crear_usuario_demo()
 
 
 HOST_REGEX = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9.-]{0,252})")

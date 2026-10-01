@@ -2,7 +2,7 @@
 import pytest
 
 from app import db
-from app.app import app
+from app.app import app, crear_usuario_demo
 
 
 @pytest.fixture
@@ -48,6 +48,15 @@ def test_crear_y_listar_nota(cliente):
     cliente.post("/notas", data={"titulo": "Compras", "contenido": "leche y pan"})
     html = cliente.get("/notas").get_data(as_text=True)
     assert "Compras" in html and "leche y pan" in html
+
+
+def test_usuario_demo_desde_variables_de_entorno(cliente, monkeypatch):
+    monkeypatch.setenv("DEMO_USUARIO", "demo")
+    monkeypatch.setenv("DEMO_PASSWORD", "clave-de-prueba")
+    with app.app_context():
+        crear_usuario_demo()
+        crear_usuario_demo()  # llamarla dos veces no duplica ni falla
+    assert iniciar_sesion(cliente, "demo", "clave-de-prueba").status_code == 302
 
 
 def test_v1_busqueda_no_filtra_notas_ajenas(cliente):
