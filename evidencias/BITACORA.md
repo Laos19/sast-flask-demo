@@ -230,3 +230,13 @@ python scripts\sarif_gate.py evidencias\04_codeql\despues\codeql.sarif 7.0   # 0
 bandit -r app -lll                                                          # exit 0
 ```
 Evidencias: `03_bandit/despues/*`, `04_codeql/despues/*`, `05_comparativa/antes_vs_despues.md`.
+
+Push de las correcciones + tag: `git push origin main --follow-tags` (85ed98f..ef74754, nuevo tag `v2-corregido`).
+Ejecución https://github.com/Laos19/sast-flask-demo/actions/runs/36840882782 → **success**.
+En Code Scanning, las alertas de la versión vulnerable deben quedar como **Fixed/Closed** tras este análisis.
+
+---
+
+## Fase 5: Despliegue en Render (2026-10-01)
+
+Pasos manuales en `07_deploy/PASOS_RENDER.md`. Se agregó `.python-version` (3.12) para que Render use Python 3.12.

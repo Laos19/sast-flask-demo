@@ -11,3 +11,7 @@ Capturas pendientes (guardar en evidencias/09_capturas/):
 - cap_actions_verde.png  -> la ejecución de arriba con los 4 jobs en verde
 - cap_code_scanning.png  -> Security > Code scanning con las alertas abiertas (filtro Tool: Bandit y CodeQL)
 - cap_artifacts.png      -> parte inferior de la ejecución, sección "Artifacts" (reporte-bandit, reporte-codeql)
+
+Ejecución de Actions (versión corregida, v2-corregido + .python-version):
+https://github.com/Laos19/sast-flask-demo/actions/runs/36840882782
+Commit: ef74754. Resultado: success (los 4 jobs ✔). El deploy sigue sin secreto -> solo muestra un aviso.
