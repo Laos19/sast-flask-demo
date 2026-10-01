@@ -278,3 +278,6 @@ git push -u origin demo-gate
 git switch main
 ```
 El PR se abre a mano desde la web (no hay GitHub CLI). Evidencias: `08_quality_gate/links.md`.
+PR https://github.com/Laos19/sast-flask-demo/pull/1 (demo-gate → main), abierto por Adriana.
+Ejecución https://github.com/Laos19/sast-flask-demo/actions/runs/36844157546 → **failure**:
+tests ✘ · sast-bandit ✘ (gate) · sast-codeql ✘ (gate; anotación `py/command-line-injection (9.8) en app/app.py:145`) · deploy **skipped**.

@@ -22,7 +22,11 @@ Prueba local antes del PR:
 - `bandit -r app -lll` → B602 subprocess_popen_with_shell_equals_true (High) → exit 1
 - `pytest` → 1 failed (`test_v2_ping_rechaza_inyeccion_de_comandos`), 6 passed. La prueba de regresión también lo detecta.
 
-Pull Request: PENDIENTE (lo abre Adriana desde https://github.com/Laos19/sast-flask-demo/pull/new/demo-gate)
-Ejecución del PR: PENDIENTE
-Resultado esperado: tests ✘ · sast-bandit ✘ (gate) · sast-codeql ✘ (gate: py/command-line-injection 9.8) · deploy **omitido** (es un PR y además depende de los 3 jobs)
+Pull Request: https://github.com/Laos19/sast-flask-demo/pull/1 (NO se fusiona; se cierra tras la demo)
+Ejecución del PR: https://github.com/Laos19/sast-flask-demo/actions/runs/36844157546 -> **failure**
+Resultado real:
+- tests ✘: falló "Run pytest -v" (prueba de regresión de V2)
+- sast-bandit ✘: falló "Quality gate Bandit (severidad alta)" (B602)
+- sast-codeql ✘: falló "Quality gate CodeQL (severidad alta)", con la anotación `py/command-line-injection (9.8) en app/app.py:145`
+- deploy ⏭ **skipped**: no se despliega nada
 Captura: `09_capturas/cap_gate_rojo.png`
