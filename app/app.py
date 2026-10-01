@@ -17,9 +17,9 @@ from app import db
 
 app = Flask(__name__)
 
-# VULNERABLE: V3 secreto escrito en el código fuente (CWE-798). Valor falso de demostración.
-SECRET_KEY = "super-secreto-123"
-app.config["SECRET_KEY"] = SECRET_KEY
+# CORREGIDO: V3 el secreto se lee de una variable de entorno (Render / GitHub Secrets), nunca del código.
+# Si falta, la app no arranca (KeyError) en lugar de usar una clave insegura por defecto.
+app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 app.config["DATABASE"] = os.environ.get("DATABASE_PATH", "notas.db")
 app.teardown_appcontext(db.close_db)
 
