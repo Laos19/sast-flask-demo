@@ -41,9 +41,9 @@ jobs:
           bandit -r app -f txt --exit-zero
           bandit -r app -f html  -o bandit.html  --exit-zero
           bandit -r app -f sarif -o bandit.sarif --exit-zero
-      # QUALITY GATE (Fase 7): descomentar para bloquear el pipeline si hay hallazgos de severidad ALTA
-      # - name: Quality gate Bandit (severidad alta)
-      #   run: bandit -r app -lll
+      # QUALITY GATE (activado en la Fase 7): bloquea el pipeline si hay hallazgos de severidad ALTA
+      - name: Quality gate Bandit (severidad alta)
+        run: bandit -r app -lll
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -75,9 +75,9 @@ jobs:
         with:
           category: codeql-python
           output: codeql-sarif
-      # QUALITY GATE (Fase 7): descomentar para bloquear si hay hallazgos High/Critical (security-severity >= 7.0)
-      # - name: Quality gate CodeQL (severidad alta)
-      #   run: python scripts/sarif_gate.py codeql-sarif/python.sarif 7.0
+      # QUALITY GATE (activado en la Fase 7): bloquea si hay hallazgos High/Critical (security-severity >= 7.0)
+      - name: Quality gate CodeQL (severidad alta)
+        run: python3 scripts/sarif_gate.py codeql-sarif/python.sarif 7.0
       - uses: actions/upload-artifact@v4
         if: always()
         with:
