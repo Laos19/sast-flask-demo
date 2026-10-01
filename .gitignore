@@ -1,0 +1,16 @@
+# Entorno virtual
+.venv/
+
+# Caché de Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Base de datos SQLite local
+*.db
+
+# Variables de entorno locales (nunca subir secretos)
+.env
+
+# Comprimido de evidencias
+evidencias_sast.zip

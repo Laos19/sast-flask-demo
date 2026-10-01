@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NotasApp</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+    nav { display: flex; gap: 1rem; padding-bottom: .75rem; border-bottom: 1px solid #ddd; margin-bottom: 1.5rem; }
+    nav a { color: #0b5cad; text-decoration: none; }
+    form { display: grid; gap: .5rem; max-width: 420px; margin-bottom: 1.5rem; }
+    input, textarea, button { font: inherit; padding: .45rem; }
+    button { background: #0b5cad; color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
+    .nota { border: 1px solid #ddd; border-radius: 6px; padding: .6rem .9rem; margin-bottom: .6rem; }
+    .error { color: #b00020; }
+    .aviso { background: #fff4e5; border-left: 4px solid #f59e0b; padding: .5rem .8rem; }
+    pre { background: #f4f4f4; padding: .8rem; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <nav>
+    <strong>NotasApp</strong>
+    <a href="{{ url_for('index') }}">Inicio</a>
+    {% if session.usuario %}
+      <a href="{{ url_for('notas') }}">Mis notas</a>
+      <a href="{{ url_for('buscar') }}">Buscar</a>
+      <a href="{{ url_for('ping') }}">Ping</a>
+      <a href="{{ url_for('logout') }}">Salir ({{ session.usuario }})</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Iniciar sesión</a>
+      <a href="{{ url_for('registro') }}">Registro</a>
+    {% endif %}
+  </nav>
+  {% block contenido %}{% endblock %}
+</body>
+</html>

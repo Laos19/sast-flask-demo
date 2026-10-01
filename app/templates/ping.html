@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block contenido %}
+  <h1>Ping a un host</h1>
+  <form method="get">
+    <input name="host" value="{{ host }}" placeholder="Ej. 127.0.0.1">
+    <button type="submit">Hacer ping</button>
+  </form>
+  {% if salida %}<pre>{{ salida }}</pre>{% endif %}
+{% endblock %}

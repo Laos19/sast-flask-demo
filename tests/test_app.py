@@ -1,0 +1,50 @@
+"""Pruebas funcionales básicas de NotasApp (pytest + cliente de pruebas de Flask)."""
+import pytest
+
+from app import db
+from app.app import app
+
+
+@pytest.fixture
+def cliente(tmp_path):
+    # Cada prueba usa su propia base SQLite temporal
+    app.config.update(TESTING=True, DATABASE=str(tmp_path / "test.db"))
+    with app.app_context():
+        db.init_db()
+    with app.test_client() as cliente:
+        yield cliente
+
+
+def registrar(cliente, usuario="ana", password="clave-demo"):
+    return cliente.post("/registro", data={"usuario": usuario, "password": password})
+
+
+def iniciar_sesion(cliente, usuario="ana", password="clave-demo"):
+    return cliente.post("/login", data={"usuario": usuario, "password": password})
+
+
+def test_home_responde_200(cliente):
+    respuesta = cliente.get("/")
+    assert respuesta.status_code == 200
+    assert "NotasApp" in respuesta.get_data(as_text=True)
+
+
+def test_registro_redirige_al_login(cliente):
+    respuesta = registrar(cliente)
+    assert respuesta.status_code == 302
+    assert respuesta.headers["Location"].endswith("/login")
+
+
+def test_login_correcto_e_incorrecto(cliente):
+    registrar(cliente)
+    assert iniciar_sesion(cliente).status_code == 302
+    respuesta = iniciar_sesion(cliente, password="otra")
+    assert "incorrectos" in respuesta.get_data(as_text=True)
+
+
+def test_crear_y_listar_nota(cliente):
+    registrar(cliente)
+    iniciar_sesion(cliente)
+    cliente.post("/notas", data={"titulo": "Compras", "contenido": "leche y pan"})
+    html = cliente.get("/notas").get_data(as_text=True)
+    assert "Compras" in html and "leche y pan" in html

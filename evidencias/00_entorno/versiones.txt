@@ -1,0 +1,7 @@
+﻿Fecha: 2026-10-01 03:12
+SO: Microsoft Windows 11 Pro 10.0.26200
+git: git version 2.51.0.windows.1
+python (sistema): Python 3.14.0
+python (.venv): Python 3.14.0
+pip (.venv): pip 26.2.1 from C:\Users\adriana\Documents\UPT\2026II\si784\sast-flask-demo\.venv\Lib\site-packages\pip (python 3.14) 
+gh (GitHub CLI): no instalado
