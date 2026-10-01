@@ -192,3 +192,11 @@ python scripts\sarif_gate.py evidencias\04_codeql\antes\codeql.sarif 7.0   # 5 h
 bandit -r app -lll                                                        # High: 3 (B324, B602, B201) -> exit 1
 ```
 Nota: con `-lll` Bandit no bloquearía por V1 (B608 es Medium) ni por V3 (B105 es Low). CodeQL sí bloquea por las 5.
+
+```powershell
+git commit -m "ci: pipeline con pytest, Bandit, CodeQL y deploy a Render"   # 85ed98f
+git push origin main
+```
+Ejecución https://github.com/Laos19/sast-flask-demo/actions/runs/36840091260 → **success**
+(tests ✔, sast-bandit ✔, sast-codeql ✔, deploy ✔ con aviso "Falta el secreto RENDER_DEPLOY_HOOK"). Artifacts: `reporte-bandit`, `reporte-codeql`.
+Evidencias: `06_pipeline/ci-sast-deploy.yml`, `explicacion_yaml.md`, `url_ejecucion.txt`.

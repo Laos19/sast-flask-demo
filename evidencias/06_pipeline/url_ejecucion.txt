@@ -1,0 +1,13 @@
+Ejecución de Actions (versión vulnerable, escaneos sin bloquear):
+https://github.com/Laos19/sast-flask-demo/actions/runs/36840091260
+Commit: 85ed98f "ci: pipeline con pytest, Bandit, CodeQL y deploy a Render"
+Resultado: success. tests ✔ · sast-bandit ✔ · sast-codeql ✔ · deploy ✔ (sin secreto RENDER_DEPLOY_HOOK todavía: solo muestra un aviso)
+Artifacts: reporte-bandit, reporte-codeql
+
+Code Scanning (alertas de Bandit y CodeQL):
+https://github.com/Laos19/sast-flask-demo/security/code-scanning
+
+Capturas pendientes (guardar en evidencias/09_capturas/):
+- cap_actions_verde.png  -> la ejecución de arriba con los 4 jobs en verde
+- cap_code_scanning.png  -> Security > Code scanning con las alertas abiertas (filtro Tool: Bandit y CodeQL)
+- cap_artifacts.png      -> parte inferior de la ejecución, sección "Artifacts" (reporte-bandit, reporte-codeql)
