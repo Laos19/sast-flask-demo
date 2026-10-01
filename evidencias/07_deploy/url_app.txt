@@ -3,3 +3,8 @@ Service ID: srv-dav2bhe0tbcc73d9k0ng · Python 3 · branch main · commit ef7475
 Start Command: gunicorn app.app:app · Build Command: pip install -r requirements.txt
 Variables de entorno: SECRET_KEY (generada por Render), FLASK_DEBUG=0
 Capturas: 09_capturas/cap_render_dashboard.png, cap_app_online.png
+
+Despliegue disparado por GitHub Actions (Deploy Hook):
+https://github.com/Laos19/sast-flask-demo/actions/runs/36843519408 (commit 52eb041)
+tests ✔ · sast-bandit ✔ · sast-codeql ✔ · deploy ✔ -> paso "Disparar Deploy Hook de Render" success, sin el aviso de secreto faltante.
+En Render -> Events debe aparecer el deploy de 52eb041 con trigger "Deploy hook".

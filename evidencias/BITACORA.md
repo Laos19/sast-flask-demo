@@ -251,3 +251,7 @@ Pasos manuales en `07_deploy/PASOS_RENDER.md`. Se agregó `.python-version` (3.1
 - Verificación con curl en `07_deploy/verificacion_online.txt`: V2 y V5 corregidos en producción.
 - **Hallazgo extra:** el payload `' OR 1=1 --` recibe `403 Blocked` del **WAF de Cloudflare** que Render pone delante del servicio.
 - El Deploy Hook **no** se guardó en el repo; se configura solo como secreto de GitHub (`RENDER_DEPLOY_HOOK`).
+- Secreto `RENDER_DEPLOY_HOOK` cargado en GitHub por Adriana (a mano). Auto-Deploy de Render en Off.
+- `git push` (ef74754..52eb041) → https://github.com/Laos19/sast-flask-demo/actions/runs/36843519408 → success.
+  El job `deploy` ejecutó `curl -fsS -X POST "$RENDER_DEPLOY_HOOK"` sin errores y ya no muestra el aviso de secreto faltante.
+- Captura: `09_capturas/cap_app_online.png`.
