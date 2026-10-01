@@ -66,7 +66,7 @@ V2 con `127.0.0.1 && whoami` ejecuta `whoami` en el servidor (`demo_cmdi.txt`, `
   bandit -r app --exit-zero      # reporta sin romper el pipeline
   bandit -r app -lll             # quality gate: solo severidad alta; exit 1 si hay alguna
   ```
-- **Tiempo:** ~0,4 s en local; job de CI completo ~18 s (incluye instalar Python y Bandit).
+- **Tiempo:** ~0,4 s en local; job de CI completo 18 s (incluye instalar Python y Bandit).
 
 ### Hallazgos ANTES (`03_bandit/antes/`): 6 hallazgos (High 3 · Medium 1 · Low 2)
 | ID regla | Severidad | Confianza | archivo:línea | V# |
@@ -118,7 +118,7 @@ sast-bandit:
 - ✘ Analiza **patrones**, no flujo de datos: no sabe si `q` viene del usuario. Por eso la SQLi sale con confianza **Low** y severidad Medium.
 - ✘ Con `-lll` **no bloquearía V1 (Medium) ni V3 (Low)**. Un gate solo por severidad alta deja pasar la SQLi.
 - ✘ B105 depende del **nombre** de la variable (`SECRET_KEY` coincide con `secret`). Con otro nombre no lo habría detectado.
-- ✘ Ruido: B404 y B603 quedan después de corregir (Low, informativos).
+- ✘ Ruido: B404 y B603 quedan después de corregir (Low, informativos). En Code Scanning siguen como 2 alertas abiertas de nivel *Note* (`cap_code_scanning.png`).
 - ✘ Solo Python.
 
 ---
@@ -155,7 +155,7 @@ sast-bandit:
   python scripts/sarif_resumen.py codeql.sarif codeql.txt   # resumen legible (script propio)
   python scripts/sarif_gate.py codeql.sarif 7.0             # quality gate (script propio)
   ```
-- **Tiempo:** ~6–10 s crear la BD + ~14–16 s analizar (51 reglas) en local; job de CI ~53 s.
+- **Tiempo:** ~6–10 s crear la BD + ~14–16 s analizar (51 reglas) en local; job de CI 39–53 s (39 s en la ejecución #7).
 
 ### Hallazgos ANTES (`04_codeql/antes/`): 5 hallazgos (Critical 1 · High 4)
 "security-severity" usa la escala de GitHub: ≥9 Critical, ≥7 High, ≥4 Medium.
@@ -230,7 +230,7 @@ sast-codeql:
 | Falsos positivos / ruido | B404 y B603 (informativos) | Ninguno |
 | ¿El gate por severidad alta bloquea las 5? | No (solo V2, V4, V5) | Sí (las 5 ≥ 7.0) |
 | Tiempo local | ~0,4 s | ~20 s |
-| Tiempo job CI | ~18 s | ~53 s |
+| Tiempo job CI | 18 s | 39–53 s |
 | Tamaño de instalación | Unos MB (pip) | 698 MB descarga |
 | Facilidad de uso | Muy alta: 1 comando, sin config | Media: crear BD + analizar; config YAML |
 | Quality gate | Incluido (`-lll` + exit code) | Script propio sobre el SARIF |
@@ -303,8 +303,8 @@ Por seguridad **solo se desplegó la versión corregida**: publicar `v1-vulnerab
 | `cap_pr_comentario_bandit.png` | En el PR #1, Code Scanning comenta B602 de Bandit en la línea 144–145 (Error) |
 | `cap_pr_comentario_codeql.png` | En el PR #1, CodeQL "Uncontrolled command line" (Critical) con Suggested changeset. *Arriba aparece el bot de SonarCloud, ajeno al proyecto* |
 | `cap_gate_rojo.png` | PR #1 con los checks fallidos (tests, sast-bandit, sast-codeql, Code scanning) y deploy omitido. *Incluye una fila de SonarCloud, ajena al proyecto* |
-| `cap_actions_verde.png` | *(pendiente)* Ejecución con los 4 jobs en verde |
-| `cap_artifacts.png` | *(pendiente)* Artifacts reporte-bandit y reporte-codeql |
-| `cap_code_scanning.png` | *(pendiente)* Security → Code scanning (alertas abiertas o cerradas/Fixed) |
+| `cap_actions_verde.png` | Ejecución #7 (ff1fde7) con quality gates activos: tests 9 s, sast-bandit 18 s, sast-codeql 39 s, deploy 3 s; 2 artifacts; total 48 s |
+| `cap_artifacts.png` | Artifacts `reporte-bandit` (2,49 KB) y `reporte-codeql` (42,8 KB) |
+| `cap_code_scanning.png` | Security → Code scanning en `main`: **2 abiertas** (Bandit B603 y B404, nivel *Note*) y **11 cerradas** (las 6 de Bandit y 5 de CodeQL de la versión vulnerable, ya corregidas). "Tools: 2" |
 | `cap_gate_verde.png` | *(pendiente)* Paso "Quality gate" en verde en `main` |
 | `cap_render_deploy_hook.png` | *(opcional)* Render → Events con un deploy de trigger "Deploy hook" |

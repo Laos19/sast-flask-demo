@@ -292,3 +292,4 @@ tests ✘ · sast-bandit ✘ (gate) · sast-codeql ✘ (gate; anotación `py/com
 - Listas oficiales verificadas: OWASP incluye **Bandit** (entrada propia) y **CodeQL** (entrada "GitHub Advanced Security").
   NIST incluye Bearer, pero no Bandit ni CodeQL.
 - Se escribieron `README.md` (badges, diagrama Mermaid, ejecución local, comandos de las herramientas) y `evidencias/RESUMEN_PARA_ARTICULO.md`.
+- Capturas finales guardadas: `cap_actions_verde.png` (run #7, 48 s), `cap_artifacts.png`, `cap_code_scanning.png` (2 abiertas *Note* de Bandit, 11 cerradas).
