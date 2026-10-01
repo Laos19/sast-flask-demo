@@ -1,0 +1,4 @@
+Herramienta: CodeQL 2.27.1
+Reglas ejecutadas: 51
+Hallazgos: 0
+

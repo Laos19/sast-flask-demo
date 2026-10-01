@@ -200,3 +200,33 @@ git push origin main
 Ejecución https://github.com/Laos19/sast-flask-demo/actions/runs/36840091260 → **success**
 (tests ✔, sast-bandit ✔, sast-codeql ✔, deploy ✔ con aviso "Falta el secreto RENDER_DEPLOY_HOOK"). Artifacts: `reporte-bandit`, `reporte-codeql`.
 Evidencias: `06_pipeline/ci-sast-deploy.yml`, `explicacion_yaml.md`, `url_ejecucion.txt`.
+
+---
+
+## Fase 6: Corrección de vulnerabilidades (2026-10-01), adelantada antes de la Fase 5
+
+**Cambio de orden decidido por el equipo:** publicar la versión vulnerable en Render habría dejado una ejecución remota de
+comandos (V2) abierta a cualquiera en internet. Por eso se corrigió primero y en Render solo se despliega `v2-corregido`.
+
+Un commit por vulnerabilidad (pytest se ejecutó después de cada uno):
+```
+340949c fix(V1): consulta parametrizada en la búsqueda de notas (CWE-89)          # 5 passed
+ffd77ca fix(V2): ping sin shell y con validación del host (CWE-78)                 # 6 passed
+130a758 fix(V3): SECRET_KEY desde variable de entorno (CWE-798)                    # 6 passed; sin la variable -> KeyError: 'SECRET_KEY'
+221be5b fix(V4): contraseñas con generate_password_hash de Werkzeug en vez de MD5  # 7 passed (1,10 s, por scrypt)
+8be3fc5 fix(V5): modo debug desde FLASK_DEBUG, desactivado por defecto (CWE-489)   # 7 passed
+```
+Archivos nuevos: `tests/conftest.py` (genera una SECRET_KEY aleatoria para las pruebas) y `.env.example`.
+
+Prueba de `host_valido()`: `127.0.0.1` ✔, `::1` ✔, `google.com` ✔, `127.0.0.1 && whoami` ✘, `-c 99 x` ✘, `a;ls` ✘.
+
+Escaneos después de las correcciones:
+```powershell
+bandit -r app -f txt|json|html|sarif -o evidencias\03_bandit\despues\bandit.<ext>
+#   Total: 2 (Low 2): B404 import subprocess (l.11), B603 subprocess_without_shell (l.150). High 0, Medium 0
+codeql database create ... ; codeql database analyze ... --output=evidencias\04_codeql\despues\codeql.sarif
+#   Hallazgos: 0
+python scripts\sarif_gate.py evidencias\04_codeql\despues\codeql.sarif 7.0   # 0 -> exit 0
+bandit -r app -lll                                                          # exit 0
+```
+Evidencias: `03_bandit/despues/*`, `04_codeql/despues/*`, `05_comparativa/antes_vs_despues.md`.
