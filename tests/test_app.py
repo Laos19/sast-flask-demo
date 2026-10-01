@@ -48,3 +48,14 @@ def test_crear_y_listar_nota(cliente):
     cliente.post("/notas", data={"titulo": "Compras", "contenido": "leche y pan"})
     html = cliente.get("/notas").get_data(as_text=True)
     assert "Compras" in html and "leche y pan" in html
+
+
+def test_v1_busqueda_no_filtra_notas_ajenas(cliente):
+    registrar(cliente, "beto", "clave-beto")
+    iniciar_sesion(cliente, "beto", "clave-beto")
+    cliente.post("/notas", data={"titulo": "Privado de Beto", "contenido": "secreto"})
+    cliente.get("/logout")
+    registrar(cliente)
+    iniciar_sesion(cliente)
+    html = cliente.get("/buscar", query_string={"q": "' OR 1=1 --"}).get_data(as_text=True)
+    assert "Privado de Beto" not in html

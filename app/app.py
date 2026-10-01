@@ -110,9 +110,11 @@ def buscar():
     q = request.args.get("q", "")
     filas = []
     if q:
-        # VULNERABLE: V1 SQL Injection, la entrada del usuario se concatena con f-string (CWE-89)
-        consulta = f"SELECT id, titulo, contenido FROM notas WHERE usuario_id = {session['usuario_id']} AND titulo LIKE '%{q}%'"
-        filas = db.get_db().execute(consulta).fetchall()
+        # CORREGIDO: V1 consulta parametrizada (?), SQLite trata "q" como dato y nunca como SQL
+        filas = db.get_db().execute(
+            "SELECT id, titulo, contenido FROM notas WHERE usuario_id = ? AND titulo LIKE ?",
+            (session["usuario_id"], f"%{q}%"),
+        ).fetchall()
     return render_template("buscar.html", q=q, notas=filas)
 
 
