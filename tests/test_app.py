@@ -61,6 +61,14 @@ def test_v1_busqueda_no_filtra_notas_ajenas(cliente):
     assert "Privado de Beto" not in html
 
 
+def test_v4_password_no_se_guarda_en_md5(cliente):
+    registrar(cliente)
+    with app.app_context():
+        guardado = db.get_db().execute("SELECT password FROM usuarios").fetchone()["password"]
+    assert guardado.startswith("scrypt:")  # formato de werkzeug: metodo$sal$hash
+    assert len(guardado) != 32             # un MD5 en hex mide 32 caracteres
+
+
 def test_v2_ping_rechaza_inyeccion_de_comandos(cliente):
     registrar(cliente)
     iniciar_sesion(cliente)

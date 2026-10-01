@@ -4,7 +4,6 @@ Sirve como objetivo para las herramientas SAST Bandit y Bearer CLI.
 ¡No usar en producción!
 """
 import functools
-import hashlib
 import ipaddress
 import os
 import re
@@ -12,6 +11,7 @@ import shutil
 import subprocess
 
 from flask import Flask, redirect, render_template, request, session, url_for
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import db
 
@@ -28,8 +28,8 @@ with app.app_context():
 
 
 def hash_password(password):
-    # VULNERABLE: V4 MD5 es un hash débil y sin sal para contraseñas (CWE-327)
-    return hashlib.md5(password.encode()).hexdigest()
+    # CORREGIDO: V4 hash lento y con sal aleatoria (scrypt de Werkzeug) en lugar de MD5
+    return generate_password_hash(password)
 
 
 HOST_REGEX = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9.-]{0,252})")
@@ -86,7 +86,7 @@ def login():
             "SELECT id, password FROM usuarios WHERE usuario = ?",
             (request.form["usuario"],),
         ).fetchone()
-        if fila and fila["password"] == hash_password(request.form["password"]):
+        if fila and check_password_hash(fila["password"], request.form["password"]):
             session.clear()
             session["usuario_id"] = fila["id"]
             session["usuario"] = request.form["usuario"]
