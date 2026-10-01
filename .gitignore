@@ -14,3 +14,6 @@ __pycache__/
 
 # Comprimido de evidencias
 evidencias_sast.zip
+
+# Base de datos de CodeQL (se regenera en cada análisis)
+codeql-db/

@@ -1,0 +1,60 @@
+Herramienta: CodeQL 2.27.1
+Reglas ejecutadas: 51
+Hallazgos: 5
+
+>> [py/flask-constant-secret-key] Initializing SECRET_KEY of Flask application with Constant value
+   Nivel SARIF: error | security-severity: 8.5 (High) | precisión: high
+   CWE: CWE-287
+   Ubicación: app/app.py:19
+   Mensaje: The SECRET_KEY config variable is assigned by [this constant String](1).
+   Flujo de datos (fuente -> sumidero):
+     línea 18: ControlFlowNode for StringLiteral
+     línea 18: ControlFlowNode for SECRET_KEY
+     línea 19: ControlFlowNode for SECRET_KEY
+------------------------------------------------------------
+>> [py/weak-sensitive-data-hashing] Use of a broken or weak cryptographic hashing algorithm on sensitive data
+   Nivel SARIF: warning | security-severity: 7.5 (High) | precisión: high
+   CWE: CWE-327, CWE-328, CWE-916
+   Ubicación: app/app.py:29
+   Mensaje: [Sensitive data (password)](1) is used in a hashing algorithm (MD5) that is insecure for password hashing, since it is not a computationally expensive hash function.
+[Sensitive data (password)](2) is used in a hashing algorithm (MD5) that is insecure for password hashing, since it is not a computationally expensive hash function.
+[Sensitive data (password)](3) is used in a hashing algorithm (MD5) that is insecure for password hashing, since it is not a computationally expensive hash function.
+   Flujo de datos (fuente -> sumidero):
+     línea 27: ControlFlowNode for password
+     línea 29: ControlFlowNode for Attribute()
+------------------------------------------------------------
+>> [py/sql-injection] SQL query built from user-controlled sources
+   Nivel SARIF: error | security-severity: 8.8 (High) | precisión: high
+   CWE: CWE-089
+   Ubicación: app/app.py:115
+   Mensaje: This SQL query depends on a [user-provided value](1).
+   Flujo de datos (fuente -> sumidero):
+     línea 11: ControlFlowNode for ImportMember
+     línea 11: ControlFlowNode for request
+     línea 110: ControlFlowNode for request
+     línea 110: ControlFlowNode for Attribute
+     línea 110: ControlFlowNode for Attribute()
+     línea 110: ControlFlowNode for q
+     línea 114: ControlFlowNode for consulta
+     línea 115: ControlFlowNode for consulta
+------------------------------------------------------------
+>> [py/command-line-injection] Uncontrolled command line
+   Nivel SARIF: error | security-severity: 9.8 (Critical) | precisión: high
+   CWE: CWE-078, CWE-088
+   Ubicación: app/app.py:128
+   Mensaje: This command line depends on a [user-provided value](1).
+   Flujo de datos (fuente -> sumidero):
+     línea 11: ControlFlowNode for ImportMember
+     línea 11: ControlFlowNode for request
+     línea 122: ControlFlowNode for request
+     línea 122: ControlFlowNode for Attribute
+     línea 122: ControlFlowNode for Attribute()
+     línea 122: ControlFlowNode for host
+     línea 128: ControlFlowNode for Fstring
+------------------------------------------------------------
+>> [py/flask-debug] Flask app is run in debug mode
+   Nivel SARIF: error | security-severity: 7.5 (High) | precisión: high
+   CWE: CWE-215, CWE-489
+   Ubicación: app/app.py:136
+   Mensaje: A Flask app appears to be run in debug mode. This may allow an attacker to run arbitrary code through the debugger.
+------------------------------------------------------------

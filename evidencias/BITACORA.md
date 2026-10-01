@@ -1,7 +1,7 @@
 # Bitácora de comandos
 
 Proyecto: `sast-flask-demo` (NotasApp) — curso SI784 Calidad y Pruebas de Software, UPT.
-Herramientas SAST: **Bandit** (integrante 1) y **Bearer CLI** (integrante 2).
+Herramientas SAST: **Bandit** (integrante 1) y **CodeQL** (integrante 2; reemplazó a Bearer CLI en la Fase 3).
 Herramientas ya usadas en labs anteriores (excluidas): SonarCloud (lab01), Snyk (lab02), Semgrep (lab03).
 
 ---
@@ -83,3 +83,98 @@ git commit -m "feat: app NotasApp versión vulnerable"
 git tag -a v1-vulnerable -m "Versión con V1–V5 sin corregir"
 ```
 Se añadió `.gitattributes` (`* text=auto eol=lf`) para usar finales de línea LF, porque Actions y Render corren en Linux.
+
+El repo público `Laos19/sast-flask-demo` se creó a mano desde https://github.com/new (vacío, sin README).
+```powershell
+git remote add origin https://github.com/Laos19/sast-flask-demo.git
+git push -u origin main --follow-tags
+#  * [new branch]      main -> main
+#  * [new tag]         v1-vulnerable -> v1-vulnerable
+```
+Verificación con la API de GitHub: `"visibility": "public"`, `"default_branch": "main"`.
+URL: https://github.com/Laos19/sast-flask-demo (en `02_repo/url_repo.txt`).
+Captura: `09_capturas/cap_repo.png`.
+
+---
+
+## Fase 3: Escaneo local de la versión vulnerable (2026-10-01)
+
+### Bandit (Antony Solorzano)
+```powershell
+.\.venv\Scripts\python.exe -m pip install "bandit[sarif]"
+bandit --version                                   # bandit 1.9.4 (python 3.14.0)
+bandit -r app -f txt   -o evidencias\03_bandit\antes\bandit.txt
+bandit -r app -f json  -o evidencias\03_bandit\antes\bandit.json
+bandit -r app -f html  -o evidencias\03_bandit\antes\bandit.html
+bandit -r app -f sarif -o evidencias\03_bandit\antes\bandit.sarif
+```
+- Tiempo de escaneo: ~0,36 s. Se analizaron 135 líneas de código.
+- Código de salida 1, porque hay hallazgos. En CI se usará `--exit-zero` para que no bloquee.
+- Resultado: **6 hallazgos** (High 3, Medium 1, Low 2):
+
+| Regla | Severidad / Confianza | Línea | V# |
+|---|---|---|---|
+| B404 blacklist (import subprocess) | Low / High | app.py:9 | (extra, informativo) |
+| B105 hardcoded_password_string | Low / Medium | app.py:18 | V3 |
+| B324 hashlib (MD5) | High / High | app.py:29 | V4 |
+| B608 hardcoded_sql_expressions | Medium / Low | app.py:114 | V1 |
+| B602 subprocess_popen_with_shell_equals_true | High / High | app.py:128 | V2 |
+| B201 flask_debug_true | High / Medium | app.py:136 | V5 |
+
+### Bearer CLI (Adriana Laos)
+- Última versión: v2.1.1. Solo se publican binarios para **Linux y macOS**; no hay versión para Windows.
+- En esta PC no hay ninguna distribución de WSL instalada (solo `docker-desktop`). Docker 29.7.2 sí está instalado.
+- Decisión: usar la imagen oficial de Docker (`bearer/bearer:latest-amd64`, ~121 MB).
+
+```powershell
+docker pull bearer/bearer:latest-amd64
+docker run --rm bearer/bearer:latest-amd64 version        # bearer version 2.1.1
+# Primer intento: escanear "." con bearer.yml (scan.skip-path) -> analizó 1709 archivos (incluyó .venv); 50,8 s
+# Segundo intento: --skip-path ".venv,evidencias,tests" -> igual, 1709 archivos (el skip-path no excluye .venv)
+# Solución: escanear solo la carpeta app (3 archivos, 3,9 s)
+docker run --rm -v "${PWD}:/tmp/scan" -w /tmp/scan bearer/bearer:latest-amd64 scan app --quiet --output evidencias/04_bearer/antes/bearer.txt
+docker run ... scan app --quiet --format json  --output evidencias/04_bearer/antes/bearer.json
+docker run ... scan app --quiet --format sarif --output evidencias/04_bearer/antes/bearer.sarif
+```
+- Resultado: **1 hallazgo**, `python_lang_weak_hash_md5` MEDIUM (CWE-328) en app.py:29 (V4). Se ejecutaron 88 reglas de Python.
+- **Problema importante:** V1, V2, V3 y V5 **no** se detectan. Revisando las reglas oficiales (repo `Bearer/bearer-rules`, carpeta `rules/python`):
+  - `python_lang_sql_injection` y `python_lang_os_command_injection` necesitan una fuente de "entrada externa"
+    (`python_shared_common_external_input`), que solo incluye Django `request`, `input()`, `sys.argv`, `sys.stdin`,
+    `argparse`, `getopt` y AWS Lambda. **`flask.request` no está entre las fuentes.**
+  - La regla de SQLi además exige que la conexión venga de `.cursor()` o de un parámetro llamado `conn`.
+  - Las reglas `debug_mode_enabled` y `weak_secret_key` existen **solo para Django** (`rules/python/django`). No hay reglas para Flask.
+- **Decisión del equipo: reemplazar Bearer por CodeQL.** Los reportes de Bearer y su `bearer.yml` se movieron a
+  `evidencias/10_bearer_descartado/`, junto con `POR_QUE_SE_DESCARTO.md`.
+
+### CodeQL (Adriana Laos, reemplaza a Bearer)
+Instalación: paquete oficial `codeql-bundle-win64.tar.gz` v2.27.1 (698 MB) desde `github/codeql-action/releases`.
+```bash
+curl -L -o codeql-bundle-win64.tar.gz https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.27.1/codeql-bundle-win64.tar.gz
+sha256sum codeql-bundle-win64.tar.gz   # 721209b5...f97202 = coincide con el .checksum.txt oficial
+tar -xzf codeql-bundle-win64.tar.gz    # -> C:\Users\adriana\tools\codeql
+codeql version                         # CodeQL command-line toolchain release 2.27.1
+```
+Configuración `.github/codeql/codeql-config.yml`: suite `security-extended` y `paths: [app]`.
+```powershell
+codeql database create codeql-db --language=python --source-root=. --codescanning-config=.github/codeql/codeql-config.yml --overwrite   # 10,1 s
+codeql database analyze codeql-db --format=sarif-latest --output=evidencias\04_codeql\antes\codeql.sarif --sarif-category=python        # 16,1 s
+codeql database interpret-results codeql-db --format=csv --output=evidencias\04_codeql\antes\codeql.csv
+```
+- Primer resultado: **4/5** (V1, V2, V4, V5). V3 (secreto en el código) **no** se detecta con la suite estándar.
+- Dentro del paquete se encontró la consulta experimental `py/flask-constant-secret-key` (precisión high). Se añadió en
+  `codeql-config.yml` con `packs: python: - codeql/python-queries:experimental/Security/CWE-287-ConstantSecretKey/WebAppConstantSecretKey.ql`.
+- Segundo resultado (create 6,1 s + analyze 14,3 s, 51 reglas): **5/5**.
+
+| Regla CodeQL | security-severity | Línea | V# |
+|---|---|---|---|
+| py/flask-constant-secret-key | 8.5 High | app.py:19 | V3 |
+| py/weak-sensitive-data-hashing | 7.5 High | app.py:29 | V4 |
+| py/sql-injection | 8.8 High | app.py:115 | V1 |
+| py/command-line-injection | 9.8 Critical | app.py:128 | V2 |
+| py/flask-debug | 7.5 High | app.py:136 | V5 |
+
+Reporte legible generado con `scripts/sarif_resumen.py` (convierte el SARIF a texto e incluye el flujo de datos):
+```powershell
+python scripts\sarif_resumen.py evidencias\04_codeql\antes\codeql.sarif evidencias\04_codeql\antes\codeql.txt
+```
+Evidencias: `04_codeql/antes/{codeql.sarif, codeql.csv, codeql.txt}` y `05_comparativa/hallazgos_antes.md`.

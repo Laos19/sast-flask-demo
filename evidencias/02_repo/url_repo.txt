@@ -1,0 +1,3 @@
+Repositorio público: https://github.com/Laos19/sast-flask-demo
+Tag versión vulnerable: https://github.com/Laos19/sast-flask-demo/releases/tag/v1-vulnerable
+Captura: evidencias/09_capturas/cap_repo.png

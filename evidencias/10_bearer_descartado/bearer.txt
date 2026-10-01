@@ -1,0 +1,30 @@
+
+
+Security Report
+
+=====================================
+
+Rules: 
+https://docs.bearer.com/reference/rules [v0.48.4]
+
+Language  Default Rules  Custom Rules  Files  
+Python    88             0             3      
+
+
+MEDIUM: Usage of weak hashing library (MDx) [CWE-328]
+https://docs.bearer.com/reference/rules/python_lang_weak_hash_md5
+To ignore this finding, run: bearer ignore add 65c9c2496677f21552e48b34c59791e4_0
+
+File: app/app.py:29
+
+ 29     return hashlib.md5(password.encode()).hexdigest()
+=====================================
+
+88 checks, 1 findings
+
+CRITICAL: 0
+HIGH: 0
+MEDIUM: 1 (CWE-328)
+LOW: 0
+WARNING: 0
+

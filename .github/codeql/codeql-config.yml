@@ -1,0 +1,10 @@
+# Configuración de CodeQL: analizar solo el código de la app (igual que Bandit con "-r app")
+name: "CodeQL NotasApp"
+queries:
+  - uses: security-extended   # consultas de seguridad estándar + extendidas
+packs:
+  python:
+    # Consulta experimental (no viene activada por defecto): detecta SECRET_KEY constante en Flask (CWE-798)
+    - codeql/python-queries:experimental/Security/CWE-287-ConstantSecretKey/WebAppConstantSecretKey.ql
+paths:
+  - app
