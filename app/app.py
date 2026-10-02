@@ -159,17 +159,11 @@ def ping():
     salida = ""
     if host:
         opcion = "-n" if os.name == "nt" else "-c"
-        ejecutable = shutil.which("ping")
-        if not host_valido(host):
-            salida = "Host no válido: usa una IP o un nombre de dominio (letras, números, '.' y '-')."
-        elif ejecutable is None:
-            salida = "El comando ping no está disponible en este servidor."
-        else:
-            # CORREGIDO: V2 lista de argumentos sin shell + host validado; "&&" o ";" ya no ejecutan nada
-            resultado = subprocess.run(
-                [ejecutable, opcion, "1", host], capture_output=True, text=True, timeout=10
-            )
-            salida = resultado.stdout + resultado.stderr
+        # VULNERABLE: V2 reintroducida a propósito (rama demo-gate) para mostrar que el quality gate bloquea el PR
+        resultado = subprocess.run(
+            f"ping {opcion} 1 {host}", shell=True, capture_output=True, text=True, timeout=10
+        )
+        salida = resultado.stdout + resultado.stderr
     return render_template("ping.html", host=host, salida=salida)
 
 
