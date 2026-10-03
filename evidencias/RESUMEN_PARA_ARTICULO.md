@@ -308,3 +308,8 @@ Por seguridad **solo se desplegó la versión corregida**: publicar `v1-vulnerab
 | `cap_code_scanning.png` | Security → Code scanning en `main`: **2 abiertas** (Bandit B603 y B404, nivel *Note*) y **11 cerradas** (las 6 de Bandit y 5 de CodeQL de la versión vulnerable, ya corregidas). "Tools: 2" |
 | `cap_gate_verde.png` | *(no tomada, opcional)* El estado verde con gates activos se ve en `cap_actions_verde.png` (run #7) |
 | `cap_render_deploy_hook.png` | *(opcional)* Render → Events con un deploy de trigger "Deploy hook" |
+
+**Capturas del sistema funcionando** (`09_capturas/demo/`, 15 imágenes generadas con Playwright, detalle en su `README.md`):
+versión vulnerable local (01–08: inicio, registro, login, notas, búsqueda normal, **SQLi**, ping normal, **Command Injection**),
+versión corregida local (09–12: la SQLi da 0 resultados, `&& whoami` → "Host no válido", el ping legítimo funciona) y
+Render (13–15: inicio, registro y **bloqueo del WAF de Cloudflare** a `' OR 1=1 --`).

@@ -302,3 +302,15 @@ Solución: `crear_usuario_demo()` en `app/app.py` crea, en cada arranque, el usu
 `DEMO_USUARIO` y `DEMO_PASSWORD` (configuradas solo en Render; nunca en el código, para no reintroducir V3).
 Usa `INSERT OR IGNORE` y `hash_password()` (scrypt).
 Verificación local: pytest 8 passed · Bandit sin cambios (2 Low) · CodeQL 0 hallazgos (gate exit 0).
+
+---
+
+## Extra: capturas automáticas del sistema funcionando (2026-10-03)
+```powershell
+.\.venv\Scripts\python.exe -m pip install playwright==1.63.0   # 38,6 MB; usa el Edge instalado (channel="msedge"), no descarga navegadores
+git worktree add --detach ..\sast-flask-demo-v1 v1-vulnerable   # versión vulnerable en una carpeta aparte
+# v1 en :5000 (python -m app.app) · v2 en :5001 (flask --app app.app run --port 5001, con SECRET_KEY y una BD temporales)
+python capturas.py evidencias\09_capturas\demo   # 15 PNG
+```
+La página del WAF de Render mostraba la IP pública del visitante; se regeneró la captura reemplazando la IP por "[IP oculta]".
+Playwright no se agregó a `requirements.txt`: solo se usa para las evidencias.
